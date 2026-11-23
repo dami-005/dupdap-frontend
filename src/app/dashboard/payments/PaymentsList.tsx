@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
@@ -453,7 +454,12 @@ export default function PaymentsList() {
                 onChange={() => toggleSelected(payment.id)}
                 aria-label={`Select payment ${payment.id}`}
               />
-              <span className="text-sm text-gray-900">{payment.id}</span>
+              <Link
+                href={`/dashboard/payments/${payment.id}`}
+                className="text-sm text-gray-900 hover:text-brand-700 hover:underline"
+              >
+                {payment.id}
+              </Link>
               <span className="text-sm text-gray-700">
                 {payment.amount} {payment.currency}
               </span>
