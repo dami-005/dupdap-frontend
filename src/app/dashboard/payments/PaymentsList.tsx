@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 import { getErrorMessage } from '@/lib/errors';
@@ -74,6 +75,78 @@ function parseStatuses(value: string | null): string[] {
 /** Accepts only `YYYY-MM-DD` values for the date range params. */
 function parseDate(value: string | null): string {
   return value && /^\d{4}-\d{2}-\d{2}$/.test(value) ? value : '';
+}
+
+/** Inline SVG illustration for the payments empty state (no external requests). */
+function PaymentsEmptyIllustration() {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 120 120"
+      className="mx-auto h-24 w-24 text-brand-200"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <circle cx="60" cy="60" r="52" className="fill-brand-50" />
+      <rect
+        x="34"
+        y="40"
+        width="52"
+        height="44"
+        rx="6"
+        className="stroke-current"
+        strokeWidth="3"
+      />
+      <path d="M34 54h52" className="stroke-current" strokeWidth="3" />
+      <path
+        d="M46 68h20"
+        className="stroke-current"
+        strokeWidth="3"
+        strokeLinecap="round"
+      />
+      <path
+        d="M46 76h12"
+        className="stroke-current"
+        strokeWidth="3"
+        strokeLinecap="round"
+      />
+      <circle
+        cx="82"
+        cy="82"
+        r="14"
+        className="fill-white stroke-current"
+        strokeWidth="3"
+      />
+      <path
+        d="M82 76v12M76 82h12"
+        className="stroke-current"
+        strokeWidth="3"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+/** Empty state shown when the merchant has no payments at all (#780). */
+function PaymentsEmptyState() {
+  return (
+    <div
+      className="rounded-md border border-dashed border-gray-200 px-6 py-12 text-center"
+      data-testid="payments-empty-state"
+    >
+      <PaymentsEmptyIllustration />
+      <p className="mt-4 text-sm font-medium text-gray-700">No payments yet</p>
+      <p className="mt-1 text-sm text-gray-400">
+        Create a payment to start accepting Stellar payments.
+      </p>
+      <Link
+        href="/dashboard/payments/new"
+        className="mt-4 inline-block rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white"
+      >
+        Create your first payment
+      </Link>
+    </div>
+  );
 }
 
 export default function PaymentsList() {
@@ -324,9 +397,13 @@ export default function PaymentsList() {
       {loading ? (
         <p className="text-sm text-gray-500">Loading payments…</p>
       ) : payments.length === 0 ? (
-        <p className="text-sm text-gray-500">
-          {hasFilters ? 'No payments match your filters.' : 'No payments found.'}
-        </p>
+        hasFilters ? (
+          <p className="text-sm text-gray-500">
+            No payments match your filters.
+          </p>
+        ) : (
+          <PaymentsEmptyState />
+        )
       ) : (
         <>
           {selectedPayments.length > 0 ? (
